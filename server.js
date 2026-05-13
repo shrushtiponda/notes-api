@@ -3,6 +3,7 @@ const dotenv = require("dotenv");
 const connectDB = require("./config/db");
 const cors = require("cors");
 const bodyParser = require("body-parser");
+const { notFound, errorHandler } = require("./middleware/errorMiddleware");
 dotenv.config();
 connectDB();
 
@@ -16,6 +17,8 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/auth", require("./routes/authRoutes"));
+app.use(notFound);
+app.use(errorHandler);
 
 app.listen(5000, () => {
   console.log("Server running on port 5000");

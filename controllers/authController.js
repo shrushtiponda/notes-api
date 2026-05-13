@@ -6,10 +6,30 @@ const jwt = require("jsonwebtoken");
 const registerUser = async (req, res) => {
   try {
     const { name, email, password } = req.body;
+    
+    if (!name || !email || !password) {
+      res.status(400);
+      throw new Error("All fields are required");
+    }
+    if (password.length < 6) {
+      res.status(400);
+      throw new Error(
+        "Password must be at least 6 characters"
+      );
+    }
+
+    const emailRegex =
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  
+    if (!emailRegex.test(email)) {
+      res.status(400);
+      throw new Error("Invalid email format");
+    }
 
     const userExists = await User.findOne({ email });
     if (userExists) {
-      return res.status(400).json({ message: "User already exists" });
+      return res.status(400);
+      throw new Error("User already exists");
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -23,7 +43,8 @@ const registerUser = async (req, res) => {
     res.status(201).json(user);
 
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500);
+    throw new Error(error.message);
   }
 };
 
@@ -34,12 +55,14 @@ const loginUser = async (req, res) => {
 
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(400).json({ message: "Invalid credentials" });
+      return res.status(400);
+      throw new Error("Invalid credentials");
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(400).json({ message: "Invalid credentials" });
+      return res.status(400);
+      throw new Error("Invalid credentials");
     }
 
     const token = jwt.sign(
@@ -51,7 +74,8 @@ const loginUser = async (req, res) => {
     res.status(200).json({ token });
 
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500);
+    throw new Error(error.message);
   }
 };
 

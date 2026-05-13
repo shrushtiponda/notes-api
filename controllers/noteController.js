@@ -3,11 +3,17 @@ const Note = require("../models/Note");
 const createNote = async (req, res) => {
   try {
     const { title, content } = req.body;
-    console.log(req.user);
     const createdBy = req.user.id;
-
-    if (!title || !content || !createdBy ) {
-      return res.status(400).json({ message: "All fields are required" });
+    if (!title || !content) {
+      res.status(400);
+      throw new Error(
+        "Title and content are required"
+      );
+    }
+    if (createdBy.toString() !== req.user.id.toString())
+   {
+      res.status(403);
+      throw new Error("Access denied");
     }
 
     const note = await Note.create({
@@ -19,7 +25,8 @@ const createNote = async (req, res) => {
     res.status(201).json(note);
 
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500);
+    throw new Error(error.message);
   }
 };
 
@@ -28,7 +35,8 @@ const getNotes = async (req, res) => {
       const notes = await Note.find({ createdBy: req.user.id });
       res.status(200).json(notes);
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      res.status(500);
+      throw new Error(error.message);
     }
   };
 
@@ -36,11 +44,13 @@ const getNotes = async (req, res) => {
     try {
       const note = await Note.findById({_id: req.params.id, createdBy: req.user.id});
       if (!note) {
-        return res.status(404).json({ message: "Note not found" });
+        return res.status(404);
+        throw new Error("Note not found");
       }
       res.status(200).json(note);
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      res.status(500);
+      throw new Error(error.message);
     }
   };
 
@@ -54,12 +64,14 @@ const getNotes = async (req, res) => {
       );
   
       if (!note) {
-        return res.status(404).json({ message: "Note not found" });
-      }k
+        return res.status(404);
+        throw new Error("Note not found");
+      }
   
       res.status(200).json(note);
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      res.status(500);
+      throw new Error(error.message);
     }
   };
 
@@ -68,12 +80,14 @@ const getNotes = async (req, res) => {
         const note = await Note.findOneAndDelete({_id: req.params.id, createdBy: req.user.id});
   
       if (!note) {
-        return res.status(404).json({ message: "Note not found" });
+        return res.status(404);
+        throw new Error("Note not found");
       }
   
       res.status(200).json({ message: "Note deleted successfully" });
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      res.status(500);
+      throw new Error(error.message);
     }
   };
 
