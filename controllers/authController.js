@@ -79,4 +79,35 @@ const loginUser = async (req, res) => {
   }
 };
 
-module.exports = { registerUser, loginUser };
+// UPLOAD PROFILE PICTURE
+const uploadProfilePic = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+
+    if (!user) {
+      res.status(404);
+      throw new Error("User not found");
+    }
+
+    if (!req.file) {
+      res.status(400);
+      throw new Error("Please upload an image");
+    }
+
+    user.profilePic = req.file.path;
+
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Profile picture uploaded",
+      profilePic: user.profilePic,
+    });
+
+  } catch (error) {
+    res.status(500);
+    throw new Error(error.message);
+  }
+};
+
+module.exports = { registerUser, loginUser, uploadProfilePic };

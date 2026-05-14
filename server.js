@@ -10,6 +10,8 @@ connectDB();
 const app = express();
 app.use(bodyParser.json());
 app.use(cors());
+app.use(express.json());
+app.use("/uploads", express.static("uploads"));
 app.use("/api/notes", require("./routes/noteRoutes"));
 
 app.get("/", (req, res) => {
